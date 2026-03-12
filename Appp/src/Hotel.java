@@ -1,85 +1,73 @@
+import java.util.HashMap;
+import java.util.Map;
+
 /**
- * Use Case 2: Basic Room Types & Static Availability
- * This version introduces Abstract Classes, Inheritance, and Polymorphism.
- * @version 2.0
+ * Use Case 3: Centralized Room Inventory Management
+ * Introduces HashMap to manage room availability state.
+ * @version 3.0
  */
 
-// 1. Abstract Class - Defines the "General Concept" of a Room
-abstract class Room {
-    private String type;
-    private double price;
+// The Inventory Manager - Encapsulates the HashMap logic
+class RoomInventory {
+    // HashMap<RoomType, Count> provides O(1) lookup and updates
+    private Map<String, Integer> inventory;
 
-    public Room(String type, double price) {
-        this.type = type;
-        this.price = price;
+    public RoomInventory() {
+        this.inventory = new HashMap<>();
     }
 
-    public String getType() { return type; }
-    public double getPrice() { return price; }
-
-    // Abstract method: Each subclass MUST define its own features
-    public abstract void displayFeatures();
-}
-
-// 2. Inheritance - Concrete specialized Room types
-class SingleRoom extends Room {
-    public SingleRoom() { super("Single Room", 100.0); }
-    @Override
-    public void displayFeatures() {
-        System.out.println("Features: 1 Single Bed, High-speed WiFi, Work Desk");
+    // Initialize or Update room counts
+    public void addRoomType(String roomType, int count) {
+        inventory.put(roomType, count);
     }
-}
 
-class DoubleRoom extends Room {
-    public DoubleRoom() { super("Double Room", 150.0); }
-    @Override
-    public void displayFeatures() {
-        System.out.println("Features: 2 Double Beds, High-speed WiFi, Smart TV");
+    // Retrieve availability for a specific type
+    public int getAvailability(String roomType) {
+        return inventory.getOrDefault(roomType, 0);
     }
-}
 
-class SuiteRoom extends Room {
-    public SuiteRoom() { super("Suite Room", 300.0); }
-    @Override
-    public void displayFeatures() {
-        System.out.println("Features: 1 King Bed, Living Area, Mini Bar, City View");
+    // Controlled update: Reduce count when a booking happens (simplified)
+    public void updateAvailability(String roomType, int newCount) {
+        if (inventory.containsKey(roomType)) {
+            inventory.put(roomType, newCount);
+        }
+    }
+
+    // Display the full state of the inventory
+    public void displayInventory() {
+        System.out.println("Current Inventory State:");
+        for (Map.Entry<String, Integer> entry : inventory.entrySet()) {
+            System.out.println("- " + entry.getKey() + ": " + entry.getValue() + " available");
+        }
     }
 }
 
-// 3. Main Application Entry Point
 public class Hotel {
-
     public static void main(String[] args) {
         System.out.println("=================================================");
-        System.out.println("       BOOK MY STAY APP - VERSION 2.0");
+        System.out.println("       BOOK MY STAY APP - VERSION 3.0");
         System.out.println("=================================================");
 
-        // Polymorphism: Handling different room objects through the 'Room' reference
-        Room sRoom = new SingleRoom();
-        Room dRoom = new DoubleRoom();
-        Room suite = new SuiteRoom();
+        // 1. Initialize the Centralized Inventory
+        RoomInventory hotelInventory = new RoomInventory();
 
-        // Static Availability: Representing stock with simple variables
-        int singleAvailable = 10;
-        int doubleAvailable = 7;
-        int suiteAvailable = 3;
+        // 2. Register Room Types (Populating the HashMap)
+        hotelInventory.addRoomType("Single Room", 10);
+        hotelInventory.addRoomType("Double Room", 7);
+        hotelInventory.addRoomType("Suite Room", 3);
 
-        // Displaying Room Details and Availability
-        printRoomDetails(sRoom, singleAvailable);
-        printRoomDetails(dRoom, doubleAvailable);
-        printRoomDetails(suite, suiteAvailable);
-
-        System.out.println("=================================================");
-    }
-
-    /**
-     * Helper method to demonstrate uniform handling of Room objects
-     */
-    private static void printRoomDetails(Room room, int count) {
-        System.out.println("Room Type: " + room.getType());
-        System.out.println("Price per Night: $" + room.getPrice());
-        room.displayFeatures();
-        System.out.println("Current Availability: " + count + " units");
+        // 3. Display Initial State
+        hotelInventory.displayInventory();
         System.out.println("-------------------------------------------------");
+
+        // 4. Demonstrate a controlled update
+        System.out.println("Updating Suite Room availability to 2...");
+        hotelInventory.updateAvailability("Suite Room", 2);
+
+        // 5. Final Check
+        System.out.println("Verification: Suite Rooms left = " +
+                hotelInventory.getAvailability("Suite Room"));
+
+        System.out.println("=================================================");
     }
 }
